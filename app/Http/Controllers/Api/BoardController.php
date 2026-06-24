@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Board;
+use App\Events\BoardUpdated;
 use Illuminate\Http\Request;
 
 class BoardController
@@ -41,6 +42,9 @@ class BoardController
         // Add creator as owner
         $board->users()->attach($request->user()->id, ['role' => 'owner']);
 
+        // Broadcast board creation
+        broadcast(new BoardUpdated($board))->toOthers();
+
         return response()->json($board->load('creator', 'users'), 201);
     }
 
@@ -76,6 +80,9 @@ class BoardController
 
         $board->update($validated);
 
+        // Broadcast board update
+        broadcast(new BoardUpdated($board))->toOthers();
+
         return response()->json($board);
     }
 
@@ -107,9 +114,12 @@ class BoardController
             $validated['user_id'] => ['role' => $validated['role']],
         ]);
 
+        $board->load('users');
+        broadcast(new BoardUpdated($board))->toOthers();
+
         return response()->json([
             'message' => 'User added to board successfully',
-            'board' => $board->load('users'),
+            'board' => $board,
         ]);
     }
 
@@ -122,9 +132,12 @@ class BoardController
 
         $board->users()->detach($userId);
 
+        $board->load('users');
+        broadcast(new BoardUpdated($board))->toOthers();
+
         return response()->json([
             'message' => 'User removed from board successfully',
-            'board' => $board->load('users'),
+            'board' => $board,
         ]);
     }
 
@@ -141,9 +154,12 @@ class BoardController
 
         $board->users()->updateExistingPivot($userId, ['role' => $validated['role']]);
 
+        $board->load('users');
+        broadcast(new BoardUpdated($board))->toOthers();
+
         return response()->json([
             'message' => 'User role updated successfully',
-            'board' => $board->load('users'),
+            'board' => $board,
         ]);
     }
 }

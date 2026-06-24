@@ -5,6 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Models\Board;
 use App\Models\Column;
 use App\Models\Task;
+use App\Events\TaskCreated;
+use App\Events\TaskUpdated;
+use App\Events\TaskDeleted;
+use App\Events\TaskMoved;
 use Illuminate\Http\Request;
 
 class TaskController
@@ -61,6 +65,9 @@ class TaskController
             'order' => $order + 1,
         ]);
 
+        // Broadcast task creation
+        broadcast(new TaskCreated($task->load('assignee')))->toOthers();
+
         return response()->json($task->load('assignee'), 201);
     }
 
@@ -106,6 +113,9 @@ class TaskController
 
         $task->update($validated);
 
+        // Broadcast task update
+        broadcast(new TaskUpdated($task->load('assignee')))->toOthers();
+
         return response()->json($task->load('assignee'));
     }
 
@@ -121,7 +131,12 @@ class TaskController
             return response()->json(['error' => 'Task not found'], 404);
         }
 
+        $boardId = $column->board_id;
+        $taskId = $task->id;
         $task->delete();
+
+        // Broadcast task deletion
+        broadcast(new TaskDeleted($taskId, $boardId))->toOthers();
 
         return response()->json(null, 204);
     }
@@ -149,6 +164,8 @@ class TaskController
             return response()->json(['error' => 'Invalid column'], 422);
         }
 
+        $sourceColumnId = $task->column_id;
+
         // If moving within same column, just update order
         if ($task->column_id === $newColumn->id) {
             $task->update(['order' => $validated['order']]);
@@ -171,6 +188,9 @@ class TaskController
             ->where('id', '!=', $task->id)
             ->where('order', '>=', $validated['order'])
             ->increment('order');
+
+        // Broadcast task movement
+        broadcast(new TaskMoved($task->load('assignee'), $sourceColumnId, $newColumn->id))->toOthers();
 
         return response()->json([
             'message' => 'Task moved successfully',

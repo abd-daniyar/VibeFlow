@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Models\Board;
 use App\Models\Task;
 use App\Models\Comment;
+use App\Events\CommentCreated;
+use App\Events\CommentDeleted;
 use Illuminate\Http\Request;
 
 class CommentController
@@ -51,7 +53,12 @@ class CommentController
             'content' => $validated['content'],
         ]);
 
-        return response()->json($comment->load('user'), 201);
+        $comment->load('user');
+
+        // Broadcast comment creation
+        broadcast(new CommentCreated($comment, $task->id))->toOthers();
+
+        return response()->json($comment, 201);
     }
 
     /**
@@ -101,7 +108,12 @@ class CommentController
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
+        $boardId = $column->board_id;
+        $commentId = $comment->id;
         $comment->delete();
+
+        // Broadcast comment deletion
+        broadcast(new CommentDeleted($commentId, $task->id, $boardId))->toOthers();
 
         return response()->json(null, 204);
     }
