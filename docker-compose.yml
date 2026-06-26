@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vibeflow_app
+    restart: unless-stopped
+    working_dir: /app
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+    volumes:
+      - ./:/app
+    ports:
+      - "8000:80"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - vibeflow
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: vibeflow_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: vibeflow
+      POSTGRES_USER: vibeflow_user
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - vibeflow
+
+  redis:
+    image: redis:7-alpine
+    container_name: vibeflow_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - vibeflow
+
+volumes:
+  postgres_data:
+
+networks:
+  vibeflow:
+    driver: bridge
