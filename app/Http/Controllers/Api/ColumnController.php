@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Api;
 use App\Models\Board;
 use App\Models\Column;
 use Illuminate\Http\Request;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class ColumnController
 {
+    use AuthorizesRequests;
     /**
      * Get all columns for a board
      */

@@ -6,11 +6,5 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 
 WORKDIR /app
 
-COPY composer.json composer.lock* ./
-RUN composer install --no-interaction
-
-COPY . .
-RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
-
-EXPOSE 80
+EXPOSE 9000
 CMD ["php-fpm"]

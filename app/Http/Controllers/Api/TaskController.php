@@ -10,9 +10,11 @@ use App\Events\TaskUpdated;
 use App\Events\TaskDeleted;
 use App\Events\TaskMoved;
 use Illuminate\Http\Request;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class TaskController
 {
+    use AuthorizesRequests;
     /**
      * Get all tasks in a column
      */

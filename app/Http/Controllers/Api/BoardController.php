@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Api;
 use App\Models\Board;
 use App\Events\BoardUpdated;
 use Illuminate\Http\Request;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class BoardController
 {
+    use AuthorizesRequests;
     /**
      * Get all boards for the authenticated user
      */
