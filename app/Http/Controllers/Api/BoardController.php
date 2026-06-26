@@ -64,6 +64,9 @@ class BoardController
                 'columns' => function ($query) {
                     $query->orderBy('order', 'asc');
                 },
+                'columns.tasks' => function ($query) {
+                    $query->orderBy('order', 'asc');
+                },
             ])
         );
     }

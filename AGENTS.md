@@ -67,6 +67,10 @@ All protected routes are nested under `{board}/{column?}/{task?}`. See `routes/a
 - **`version: '3.8'`** in docker-compose.yml is obsolete (warning only)
 - **`public/build/`** is gitignored — frontend must be rebuilt after pulls
 - **`.env`** is gitignored — always copy from `.env.example` and add `SESSION_DRIVER=file`
+- **`BoardController.show` must eager load `columns.tasks`** — the board detail page renders `column.tasks.length` in the template; without it the frontend gets a TypeError and breaks (appears as "infinite loading")
+- **Nginx SPA fallback** is in `docker/nginx/default.conf` — `/build/` serves built assets, `/` and all other routes fall back to `/build/index.html` for the Vue SPA
+- **`vite.config.js` uses `base: '/build/'`** — the build output references assets at `/build/assets/...` to match Nginx serving from `/app/public`
+- **Custom CSS classes** (`btn-primary`, `btn-secondary`, `input-field`) are defined via `@apply` in `resources/css/app.css` — do not remove
 - **`config/cors.php`** and **`config/broadcasting.php`** are missing — Laravel 11 defaults used
 - **composer.json** has 7 advisory audit ignores in `config.audit.ignore`
 
