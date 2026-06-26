@@ -13,11 +13,25 @@ services:
       - DB_PORT=5432
     volumes:
       - ./:/app
-    ports:
-      - "8000:80"
+    expose:
+      - "9000"
     depends_on:
       - postgres
       - redis
+    networks:
+      - vibeflow
+
+  nginx:
+    image: nginx:alpine
+    container_name: vibeflow_nginx
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - ./:/app
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
     networks:
       - vibeflow
 

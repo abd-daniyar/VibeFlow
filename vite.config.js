@@ -11,7 +11,12 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    proxy: {
+      '/api': 'http://localhost:8000',
+    },
   },
+  publicDir: false,
+  base: '/build/',
   build: {
     outDir: 'public/build',
   },
